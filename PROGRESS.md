@@ -112,3 +112,171 @@ This file is append-only. Failed commands, withdrawn claims, and superseded deci
 - **Risks and rollback:** Host contention remains high, but all waits are finite and semantic/ownership failures remain terminal. The support matrix continues to mark every PDF outcome unimplemented and every platform unsupported until stronger evidence exists. Rollback is the coherent revert of the Tier 0 foundation; no persisted user data exists.
 - **Blocked items:** None.
 - **Next item selected:** Review the exact diff, commit the coherent Tier 0 foundation, reproduce `verify-all` from a clean checkout at that commit, then push and obtain CI evidence before beginning Tier 1 immediately.
+
+## 2026-08-10T08:27:28-07:00 — Current application progress audit and next-agent handoff
+
+This entry is a repository-wide implementation audit, not a claim that the product is complete. It
+describes committed `main` at `cf6a7238b021883cb71bd6bafe8e4cb73997f3eb`, the durable CI result for
+that commit, and the local development-health result observed immediately before this entry.
+
+### Executive status
+
+- **Production state:** Not yet in production. None of the 18 simultaneous production conditions in
+  `GOAL.md` section 5 has been demonstrated as a complete set.
+- **Application state:** The repository has a strong executable Tier 0 foundation and an honest static
+  status page. It still has no user document input, PDF parser, findings engine, sanitizer, independent
+  verifier, OCR path, region editor, sanitized-PDF export, or verification-report export.
+- **Current goal position:** Tier 0 implementation is committed and the same commit passed the Linux
+  clean-install CI workflow. ADR-0001's separately named `npm run evidence:clean-verify` artifact is
+  not committed, and several status documents still say clean CI is pending. Treat Tier 0 as
+  implemented and CI-verified but with evidence/documentation closure still open; do not round that
+  gap up to a Tier 1 or production claim.
+- **Next product tier:** Tier 1, machine-enforcing all seven document-safety invariants before any
+  document ingestion path is exposed.
+- **External blockers:** None are recorded in `BLOCKED.md` and none were discovered in this audit.
+
+### Evidence that is currently real
+
+- `origin/main` and the audited working branch both pointed to
+  `cf6a7238b021883cb71bd6bafe8e4cb73997f3eb` at the start of this entry.
+- GitHub Actions run
+  [31402757094](https://github.com/rishabhcli/neuralsprint/actions/runs/31402757094) completed
+  successfully for that exact commit. The workflow checked out a clean tree, installed Node.js
+  24.19.0 and npm 11.17.0, ran `npm run bootstrap`, ran the complete `npm run verify-all` contract,
+  and required deterministic regeneration with no resulting Git diff.
+- `npm run dev:preflight && npm run dev:up && npm run dev:health` passed during this audit. The four
+  repository-owned services were semantically ready on `127.0.0.1:4210` through `4213`; reserved
+  ports `4214` through `4219` were free.
+- The committed working-tree log records 27/27 Vitest checks, 4/4 Chromium foundation E2E checks,
+  and 2/2 tagged accessibility checks. Its V8 percentage covers only `src/config`; it is not
+  repository-wide or PDF-domain coverage.
+- One deterministic, synthetic covered-text smoke PDF is generated under ignored `.dev/` state and
+  validated by an integration test. It is fixture-service evidence only: there are zero tracked PDF
+  corpus files, and no code detects or repairs the seeded token.
+- Release metadata currently describes a static three-artifact browser build and a three-component
+  production SBOM. It does not describe a PDF-processing release.
+
+### Canonical user workflow scorecard
+
+| Required user outcome                                                      | Current state   | What must exist before this row can pass                                                                                 |
+| -------------------------------------------------------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| 1. Parse and inventory the entire PDF locally                              | Not implemented | Bounded file ingestion, xref tables and streams, object graph, filters, revision chain, typed refusals, and parser tests |
+| 2. Map paint order, text, OCR, revisions, forms, metadata, and attachments | Not implemented | Interpreter geometry plus typed leak inventory across every declared surface                                             |
+| 3. Let the user confirm sensitive regions or tokens                        | Not implemented | Accessible page review, masked findings, keyboard/numeric region editing, and safe reveal behavior                       |
+| 4. Choose vector-preserving or high-assurance raster repair                | Not implemented | Explicit repair policy, ambiguity defaults, cancellation, limits, and truthful trade-off copy                            |
+| 5. Rebuild fresh bytes rather than append an edit                          | Not implemented | Allowlisted fresh-object-graph sanitizer, raster fallback, and revision-absence proof                                    |
+| 6. Independently reload and re-attack emitted bytes                        | Not implemented | Fresh worker/process contract with no sanitizer state plus structural, text, byte, OCR, and pixel attacks                |
+| 7. Export a sanitized PDF and scoped report                                | Not implemented | Downloadable fresh PDF, versioned report schema, masked evidence, hashes, and exact named-attack results                 |
+
+The product workflow is therefore not partially available: the UI intentionally exposes no file input
+or document-safety verdict until these boundaries exist.
+
+### `GOAL.md` ladder status
+
+|                               Tier | Audited status                                 | Repository evidence or gap                                                                                                                                                                                                                    |
+| ---------------------------------: | ---------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|          0 — executable foundation | Implemented and CI-verified; closure task open | Strict toolchain, lockfile, commands, CI, lifecycle, boundaries, governance, threat model, support matrix, SBOM, and manifest exist. A committed `evidence/tier0-clean-verify.log` and reconciliation of stale "CI pending" text remain open. |
+|              1 — domain invariants | Not delivered                                  | `src/config/release-boundary.ts` fail-closes the foundation and has two 1,000-run properties, but it does not encode the seven PDF-domain invariants or their required alert/fault/refusal contracts.                                         |
+|            2 — hard technical core | Not started                                    | No tracked parser, interpreter, findings, sanitizer, verifier, OCR, or committed adversarial corpus exists.                                                                                                                                   |
+|     3 — ingestion/trust boundaries | Not started for documents                      | Tier 0 loopback and fixture boundaries are hardened; there is no document-ingestion schema, size/memory/time budget, parser adapter, worker protocol, or document threat analysis.                                                            |
+|           4 — first vertical slice | Not started                                    | No inspect-confirm-repair-reload-export user outcome exists.                                                                                                                                                                                  |
+|         5 — refusal and abstention | Foundation refusal only                        | The static release boundary refuses all document processing. Product-specific malformed PDF, unknown filter, incomplete verification, cancellation, and recovery states do not exist yet.                                                     |
+|                6 — ownership areas | UI foundation only                             | `src/ui` has two tracked files. `src/pdf/parser`, `src/pdf/interpreter`, `src/findings`, `src/sanitizer`, and `src/verifier` are absent.                                                                                                      |
+|           7 — verification lattice | Foundation-only tests                          | Unit, property, integration, contract, E2E, security, accessibility, build-budget, and audit commands exist, but none verifies a PDF user outcome. OCR, pixel, byte, revision, mutation, fuzz, and large-document coverage are absent.        |
+|            8 — evaluation/evidence | Foundation evaluation only                     | `npm run eval` proves that document processing is unavailable; it publishes no PDF detection, repair, residual, or false-green metric.                                                                                                        |
+|   9 — performance/resilience/chaos | Foundation controls only                       | Static bundle-byte budgets and bounded child/lifecycle failure tests exist. PDF latency, memory, cancellation, recovery, worker crash, and chaos budgets do not.                                                                              |
+| 10 — security/privacy/supply chain | Tier 0 only                                    | A Tier 0 threat model, exact dependencies, audits, SBOM, and no-client-network scan exist. There is no threat model or structural privacy proof for user document bytes because ingestion is absent.                                          |
+|         11 — operational readiness | Development health only                        | Typed local liveness/readiness exists. Production SLOs, telemetry destination, dashboard, deployment, rollback, emergency disable, incident process, and relevant restore drill do not.                                                       |
+|    12 — production/soak/real usage | Not started                                    | No tagged deployment, reproducibility drill, authoring-tool corpus, soak window, non-author user outcome, incident exercise, dependency-upgrade proof, or rollback drill.                                                                     |
+|           13 — submission artifact | Draft record only                              | `HACKATHON.md` records draft submission `1131630`; no approved product name, production try-it-out link, evidence-checked copy, screenshots, public demo video, or finalized submission is committed.                                         |
+
+### Domain-invariant gap audit
+
+| Invariant                                                 | Current enforcement                                                                           | Required Tier 1 closure                                                                                                      |
+| --------------------------------------------------------- | --------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| I1. No document byte leaves the device by default         | The foundation contains no client network primitive and accepts no document.                  | Encode a local-only document protocol before file input exists; property-test egress attempts and fault/cancellation paths.  |
+| I2. A visual overlay is never removal                     | The smoke fixture contains text followed by a filled rectangle, but no product interprets it. | Make overlay detection a leak finding that can never transition directly to removed/verified.                                |
+| I3. Output is always a fresh object graph                 | No output path exists.                                                                        | Brand or otherwise type fresh rebuild output so incremental append cannot satisfy the sanitizer contract.                    |
+| I4. Unknown state yields NOT VERIFIED                     | The foundation release configuration rejects permissive mutations.                            | Add document verdict and error unions in which unknown parser/filter/structure state has no green transition.                |
+| I5. Secrets are masked structurally by default            | Only a synthetic token exists in ignored fixture bytes; no finding/report type exists.        | Introduce masked-evidence domain types and tests covering UI, logs, telemetry, screenshots, and report serialization.        |
+| I6. Verification independently reloads emitted bytes      | No sanitizer or verifier exists.                                                              | Define a serialized worker/process boundary that accepts emitted bytes and policy only, never sanitizer-owned mutable state. |
+| I7. Green names the attacks passed and is never universal | The foundation makes no safety claim.                                                         | Make a verified verdict require a non-empty, versioned list of passed attacks and scoped limitation text by construction.    |
+
+For every row, Tier 1 also requires a named property-test count, malformed-boundary behavior,
+fault-injection scenario, observable event, and future alert/runbook reference. Prose alone is not exit
+evidence.
+
+### Release-gate status
+
+| Gate                                                          | Current status          | Reason                                                                                                                                |
+| ------------------------------------------------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| G1. Required fixture classes detect and repair                | Failing / unavailable   | One ephemeral smoke fixture is generated; no fixture is detected or repaired, and the required adversarial corpus is absent.          |
+| G2. Zero seeded-token residuals across all attacks            | Unavailable             | There is no sanitizer or independent verifier.                                                                                        |
+| G3. Unsupported and malformed inputs never show green         | Foundation-only refusal | There is no PDF input or green document state, so product behavior has not been tested.                                               |
+| G4. No-network/document privacy                               | Foundation-only pass    | Static source/bundle and browser loopback checks pass; no document path exists to exercise success, error, cancellation, or recovery. |
+| G5. Large-file memory/cancel/recovery budgets                 | Unavailable             | No PDF processing or declared document resource budget exists.                                                                        |
+| G6. Versioned threat model, support matrix, and report schema | Partial                 | Tier 0 threat model and support matrix exist; the document threat model and verification-report schema do not.                        |
+
+### Documentation drift found by this audit
+
+- `SUPPORT_MATRIX.md` and several append-only validation entries in `ASSUMPTIONS.md` still describe
+  committed CI evidence as pending, although CI run 31402757094 succeeded for `cf6a723`.
+- ADR-0001 explicitly names a separate clean-checkout capture as validation, but
+  `evidence/tier0-clean-verify.log` is absent. Do not replace that missing artifact with the mutable
+  working-tree `evidence/tier0-verify.log`.
+- `HACKATHON.md` and `WINNING_IDEA.md` contain historical snapshot language saying no code or
+  implementation existed when those dossiers were written. They remain authorities for external
+  facts and selected design, not the current implementation-status source; this journal and the
+  support matrix must carry current status without silently rewriting historical evidence.
+- The current README accurately refuses PDF capability, but its "Tier 0" wording should be
+  reconciled only after the evidence closure above, not optimistically advanced.
+
+### Next work, in required order
+
+1. **Close Tier 0 evidence and documentation drift on the current clean `main`.** Keep
+   `dev:health` green; run `npm run evidence:clean-verify` from a clean checkout; inspect the exact
+   generated file and commit metadata; record the new successful CI run URL; append superseding
+   validation entries to `ASSUMPTIONS.md`; and update `SUPPORT_MATRIX.md` without deleting historical
+   journal entries. If the clean gate fails, fix its first failure before any Tier 1 work.
+2. **Design the Tier 1 document-safety contract before adding an upload control.** Update the threat
+   model and add an ADR if the slice introduces the first document input, worker protocol, parser
+   dependency, persistent data, or major algorithm. Define ownership, provenance, size/time/memory
+   limits, cancellation, stable error codes, redacted observability, and rollback.
+3. **Machine-encode I1 through I7 together.** Use domain types/tagged unions and runtime schemas so
+   invalid transitions are unrepresentable. Add seeded property tests, malformed-input tests, and
+   fault/refusal tests with named case counts. Do not treat the current static no-network scan as the
+   final I1 control.
+4. **Run the five-fixture kill-test slice only after the invariant boundary is real.** Promote fixtures
+   from an ignored lifecycle smoke PDF into a committed, versioned adversarial manifest covering
+   rectangle-over-text, unapplied redaction annotation, OCR layer, incremental history, and
+   attachment leakage. The first correctness oracle must prove findings, not merely valid PDF bytes.
+5. **Do not build visual workflow polish before the technical core.** The next interface control must
+   belong to a complete inspect/refuse/observe slice, not a dead upload, canned finding, fake progress
+   indicator, or safety badge.
+
+### Acceptance checks for the next handoff
+
+- The exact `main` commit has a durable clean verification artifact and successful CI URL.
+- Status documents no longer claim that already-obtained CI evidence is pending.
+- Each of I1 through I7 points to a concrete type/schema/boundary assertion and a named seeded
+  property test; unknown states cannot construct a green verdict.
+- The document boundary has explicit byte, page, time, memory, and concurrency limits plus
+  cancellation and safe error codes before browser file input is enabled.
+- Any new fixture evidence is committed, deterministic, synthetic, provenance-aware, and paired with
+  expected findings; a generated valid PDF alone is not detection evidence.
+- No PDF byte leaves loopback/device boundaries in success, refusal, failure, or cancellation tests.
+- The handoff names commands, evidence, risks, rollback, blockers, and the next `GOAL.md` section 10
+  item without claiming production.
+
+### This documentation slice
+
+- **Repository changes:** This append-only `PROGRESS.md` entry only; no runtime, dependency,
+  persistent-data, port, or architecture change.
+- **Commands used for the audit:** Authority-document reads; tracked-file, source, test, dependency,
+  evidence, branch, and history inspection; `git fetch origin main`; `gh run list`; and
+  `npm run dev:preflight && npm run dev:up && npm run dev:health`.
+- **Risk:** This is a point-in-time map. Executable evidence and the support matrix remain the
+  authority for capability claims after future commits.
+- **Rollback:** Revert this documentation commit only. No application state or user data exists.
+- **Next item selected by `GOAL.md` section 10.1:** Close the missing clean-evidence and stale-status
+  documentation gap, then begin Tier 1 invariant encoding. No unrelated feature work outranks it.
