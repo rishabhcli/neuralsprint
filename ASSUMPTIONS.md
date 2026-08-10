@@ -114,3 +114,20 @@ This register records decisions made without user input. Entries are append-only
 - **Evidence:** An authoritative Node.js 24 build with inherited `NODE_ENV=test` and an injected `VITE_*` canary emitted a production artifact without the canary or repository path. `check-build` measured 193,134 JavaScript bytes, 3,673 CSS bytes, and 197,451 total bytes against limits of 204,800, 51,200, and 307,200 respectively.
 - **Remaining uncertainty:** Build-duration SLOs are not a Tier 0 support claim; later performance tiers must add them before production.
 - **Status:** Accepted for the Tier 0 artifact boundary.
+
+## Tier 0 closure — clean-checkout and CI evidence now exist
+
+- **Recorded:** 2026-08-10
+- **Supersedes the open status of:** A-0001, A-0002, A-0003, A-0004, A-0007 validation updates that recorded clean-checkout or CI reproduction as pending.
+- **Evidence:** `npm run evidence:clean-verify` ran at commit `afd2da487262ecf1de26e35d952e0ed42fbd1524` with `git status --porcelain=v1 --untracked-files=all` empty both before and after, producing `evidence/tier0-clean-verify.log` (287 lines, macOS 27 arm64, Node.js 24.19.0, npm 11.17.0). GitHub Actions run [31403907792](https://github.com/rishabhcli/neuralsprint/actions/runs/31403907792) completed successfully for the same commit on `ubuntu-24.04`, running the identical `npm run verify-all` contract from a fresh checkout and asserting deterministic regeneration with an empty `git status`.
+- **What is now supported:** Node.js 24.19.0 with npm 11.17.0, macOS 27 arm64 and ubuntu-24.04 x86_64 hosts, and Playwright-pinned Chromium, scoped strictly to the Tier 0 foundation surface. `SUPPORT_MATRIX.md` has been updated to state exactly this and nothing more.
+- **Remaining uncertainty:** Firefox, WebKit, mobile browsers, and Windows remain unverified. Clean-checkout evidence is a per-commit claim; every later commit needs its own regeneration.
+- **Status:** Closed for Tier 0. Reopened automatically by any commit whose clean gate or CI run is not green.
+
+## A-0009 — Domain packages parse PDF bytes without an external parser dependency
+
+- **Recorded:** 2026-08-10
+- **Assumption:** `src/pdf/parser`, `src/pdf/interpreter`, `src/findings`, `src/sanitizer`, and `src/verifier` implement the xref, object-graph, filter, revision, and content-stream layers in dependency-free TypeScript rather than delegating to PDF.js.
+- **Reasoning:** `scripts/check-boundaries.mjs` already refuses every external import inside a domain owner, and `AGENTS.md` requires a lower-level xref/object/revision parser in addition to PDF.js. Forensic claims about hidden content, incremental revisions, and emitted bytes require byte-exact control that a rendering-oriented library does not expose, and an independent verifier that shares a parser with the sanitizer would violate invariant I6. PDF.js remains available to the UI/adapter layer for rendering and as a cross-parser comparison oracle, where its objects never cross into the domain.
+- **Cheapest verification:** `npm run boundaries` must keep failing on any external import inside a domain owner, and the cross-parser comparison suite must show the domain parser and an independent parser agreeing on fixture object graphs.
+- **Status:** Accepted; revisit only through an ADR that also explains how I6 independence survives a shared parser.
