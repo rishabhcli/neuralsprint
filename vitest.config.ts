@@ -4,7 +4,15 @@ export default defineConfig({
   cacheDir: '.dev/cache/vitest',
   test: {
     coverage: {
-      include: ['src/config/**/*.ts'],
+      // Every domain ownership area that has code. `src/ui` and `src/main.tsx` are
+      // covered by the Playwright layer instead, which exercises them in a real browser.
+      include: [
+        'src/config/**/*.ts',
+        'src/findings/**/*.ts',
+        'src/pdf/**/*.ts',
+        'src/sanitizer/**/*.ts',
+        'src/verifier/**/*.ts',
+      ],
       provider: 'v8',
       reporter: ['text', 'json-summary', 'lcov'],
       thresholds: {

@@ -280,3 +280,132 @@ evidence.
 - **Rollback:** Revert this documentation commit only. No application state or user data exists.
 - **Next item selected by `GOAL.md` section 10.1:** Close the missing clean-evidence and stale-status
   documentation gap, then begin Tier 1 invariant encoding. No unrelated feature work outranks it.
+
+---
+
+## 2026-08-10 — Tier 0 closure and Tier 1 domain-invariant encoding
+
+### Behaviour delivered
+
+**Tier 0 closure.** The last handoff named two open items: a missing clean-checkout
+evidence artifact, and status text that still described already-obtained CI evidence as
+pending. Both are closed.
+
+- `evidence/tier0-clean-verify.log` now exists (287 lines). It was produced at commit
+  `afd2da487262ecf1de26e35d952e0ed42fbd1524` by `npm run evidence:clean-verify`, which
+  refuses to run unless `git status --porcelain=v1 --untracked-files=all` is empty, and
+  refuses to write unless the tree is still empty afterwards. Both checks passed, so the
+  log proves a clean checkout regenerates every committed artifact without drift.
+- `SUPPORT_MATRIX.md` now states clean-checkout and CI evidence for the foundation status
+  page, the local service lifecycle, repository verification, and the PDF-inspection
+  absence claim. The platform matrix names Node.js 24.19.0 + npm 11.17.0, macOS 27 arm64
+  and ubuntu-24.04 x86_64, and Playwright-pinned Chromium — and nothing else.
+- `ASSUMPTIONS.md` gained a Tier 0 closure entry superseding the open clean-checkout/CI
+  statuses on A-0001, A-0002, A-0003, A-0004 and A-0007, plus A-0009 recording the
+  dependency-free domain parser direction.
+
+**Tier 1 — the seven domain invariants are now machine-enforced.** Every invariant in
+`AGENTS.md` § Domain invariants is encoded in a type, a tuple type, or a boundary
+assertion, and attacked by a named property test with a declared case count. Nothing here
+adds a user-facing capability; it adds the boundary that Tier 2's parser has to be built
+inside.
+
+| Invariant                      | Encoding that makes it unrepresentable to violate                                                                                                                                                                                                                                      |
+| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| I1 no byte leaves the device   | `DeviceLocalBytes` is nominal (private constructor + `#private` field) and copies on adoption; `ExternalTargetClassification.refused` has the literal type `true`; `resolveExternalTarget` returns `never`; an unlisted URI scheme is reported as `unlisted-scheme` rather than echoed |
+| I2 an overlay is not removal   | `ContentPresence` has exactly two members and neither means absent; `presenceFromVisibility` is total; `ResolvedFinding` is nominal and reachable only through `resolveFinding`, which demands an `IndependentAbsenceProof` covering every surface the leak class declares             |
+| I3 fresh object graph only     | `FreshDocumentBytes` is nominal; `seal` audits the **emitted bytes** for more than one header/`startxref`/`%%EOF`, any `/Prev`, and output that begins with the source                                                                                                                 |
+| I4 unknown yields NOT VERIFIED | the green verdict variant's `unknowns` field is the empty tuple type `readonly []`, so a scope with any unknown state is not assignable; `deriveVerdict` returns NOT VERIFIED before evaluating anything else                                                                          |
+| I5 secrets masked by default   | masking is a function of the character-class sequence alone; the secret lives in a `#private` field so spread, `Object.keys`, `structuredClone` and `JSON.stringify` cannot reach it; `assertReportSafe` refuses a sensitive-channel payload at any depth                              |
+| I6 independent verification    | the verifier accepts only structured-clone-safe plain data, re-derives the digest of the bytes it received, and refuses class instances, functions, symbols, accessors and symbol keys; `check-boundaries` forbids `src/verifier` importing `src/sanitizer`                            |
+| I7 green names its attacks     | `attacksPassed` and `notCovered` are non-empty tuple types and `STANDING_LIMITATIONS` is merged into every scope, so universal safety has no representation; `bannedSafetyPhrasesIn` refuses the copy that would imply it                                                              |
+
+Supporting production code added: stable error vocabularies with retryability and safe
+user messages for the parser, findings, sanitizer and verifier areas; explicit document
+budgets with a `BudgetMeter` that has no "unlimited" representation; exact axis-aligned
+union geometry so coverage cannot be over-reported by double-counting occluders; and a
+dependency-free SHA-256 for document provenance.
+
+### Two real defects the property tests found, and the fixes
+
+1. **A crafted URI scheme could print a secret into a finding.** `classifyReferenceTarget`
+   returned the parsed scheme verbatim, so a document naming a target such as
+   `<secret>:/payload` would have echoed the secret into any report or log line carrying
+   the classification. Fixed by allowlisting the scheme vocabulary and reporting anything
+   else as `unlisted-scheme`. Attacked by `i1-refuses-every-target` at 4,000 cases.
+2. **A standing limitation quoted a banned safety phrase.** The legal limitation read
+   "...not a guarantee that the document is safe to publish", which contains
+   `safe to publish`. A clipped screenshot loses the negation. Reworded to avoid every
+   banned phrase even in negated form. Caught by `i7-never-universal` at 4,000 cases.
+
+### Commands run
+
+```sh
+npm run dev:preflight && npm run dev:health   # all four services ready on 4210-4213
+npm run evidence:clean-verify                 # emitted evidence/tier0-clean-verify.log
+npm run check                                 # format, lint, typecheck, boundaries
+npx vitest run --coverage                     # 19 files, 146 checks
+npm run verify-all                            # complete gate, see below
+```
+
+### Evidence emitted
+
+- `evidence/tier0-clean-verify.log` — clean-checkout gate at `afd2da4`, no drift.
+- `docs/invariants.md` — the Tier 1 register: encoding, property test with case count,
+  fault-injection scenario, malformed-input behaviour, and alert → runbook per invariant.
+- `docs/runbooks/` — one runbook per invariant alert, plus a severity vocabulary.
+- Test counts: **146 checks across 19 files**, of which the seven invariant property
+  files run **77,000 generated cases** in total, all seeded and recorded in the test names.
+- Coverage over `src/config`, `src/findings`, `src/pdf`, `src/sanitizer`, `src/verifier`:
+  **96.97% statements, 94.58% branches, 99.30% functions, 97.86% lines**, against a 90%
+  threshold that now covers every domain area rather than `src/config` alone.
+
+### What is now true that was not true before
+
+- A future parser cannot resolve an external reference, because the only resolver-shaped
+  function in the domain returns `never`.
+- A future sanitizer cannot emit an appended revision, because `seal` reads the emitted
+  bytes rather than the writer's intent.
+- A future verifier cannot share sanitizer state, because the request type has no
+  representation for a live object and the digest is re-derived on the far side.
+- A future UI cannot render a green result without naming its attacks and its limits,
+  because the green verdict variant requires both as non-empty tuples.
+
+### What is still not true
+
+- **No PDF is parsed.** There is no lexer, no xref reader, no object graph, no filters,
+  no revision chain, no content-stream interpreter, no sanitizer writer, and no attack
+  implementation. Tier 1 built the boundary; Tier 2 has to build the thing inside it.
+- Release gates G1–G6 remain unsatisfied. G3 and G4 now have real machinery behind them
+  but no document path to exercise.
+- No production surface from `GOAL.md` section 5 is satisfied. The repository is **not in
+  production**.
+- The alerts named in `docs/invariants.md` have no destination, because clause 9 of
+  section 5 is unmet. Each names the event it will consume.
+
+### Risks
+
+- The invariant register cites file line numbers. A later edit moves them; the symbol
+  names are the durable reference and the register says so.
+- Masked evidence deliberately discloses length and character-class shape. For a short
+  structured token that is a meaningful hint, and it is the price of letting a user
+  recognise which finding is which. Recorded as a deliberate trade-off, not an oversight.
+- `structuredClone` is used in the fault-injection layer as the serialization boundary.
+  It is the same mechanism `postMessage` uses, but a real worker hop is still owed at
+  Tier 2 when the verifier actually runs out-of-process.
+
+### Rollback
+
+Revert the commit. No persistent state, no migration, no deployed surface, no user data.
+The dev services are unaffected; `npm run dev:health` was green before and after.
+
+### Next item selected by `GOAL.md` section 10.1
+
+`dev:health` passes and no release gate can be fixed without a document path, so the
+selector lands on item 7, the lowest-numbered incomplete tier: **Tier 2, the hard
+technical core.** In order: the PDF lexer and object model; xref tables and xref streams
+with the full incremental revision chain; the filter chain with explicit refusal for
+anything undecodable; then the content-stream interpreter that makes I2's coverage
+geometry real on actual page content. The Tier 2 kill test is next after the lexer:
+whether paint-order geometry can detect covered text on documents produced by real
+authoring tools, or only on synthetic fixtures.
