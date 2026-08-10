@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "command": "npm run eval",
+  "seed": 20260809,
+  "scope": "tier-0-foundation-contract",
+  "assertions": {
+    "documentProcessingRefused": true,
+    "noDocumentSafetyClaim": true,
+    "noRuntimeNetworkDependency": true,
+    "productionStatusTruthful": true,
+    "supportMatrixMatches": true
+  }
+}

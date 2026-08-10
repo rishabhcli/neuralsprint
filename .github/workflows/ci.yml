@@ -1,0 +1,149 @@
+name: Tier 0 verification
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tier0-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  CI: 'true'
+  NO_COLOR: '1'
+  PLAYWRIGHT_BROWSERS_PATH: .dev/cache/ms-playwright
+
+jobs:
+  verify:
+    name: Clean-install verification
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Set up pinned Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24.19.0
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install pinned npm
+        timeout-minutes: 4
+        run: npm install --global --no-audit --no-fund npm@11.17.0
+
+      - name: Verify pinned toolchain
+        run: |
+          test "$(node --version)" = "v24.19.0"
+          test "$(npm --version)" = "11.17.0"
+
+      - name: Install lifecycle system prerequisite
+        timeout-minutes: 4
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends lsof
+
+      - name: Bootstrap locked dependencies and pinned Chromium
+        timeout-minutes: 12
+        run: npm run bootstrap
+
+      - name: Install Chromium system dependencies
+        timeout-minutes: 8
+        run: npm exec -- playwright install-deps chromium
+
+      - name: Run the complete verification contract
+        timeout-minutes: 18
+        run: |
+          mkdir -p .dev/logs
+          set -o pipefail
+          {
+            printf '# command: npm run verify-all\n'
+            printf '# seed: 20260809\n'
+            printf '# git-commit: %s\n\n' "$GITHUB_SHA"
+            npm run verify-all
+          } 2>&1 | tee .dev/logs/ci-verify-all.log
+
+      - name: Assert deterministic regeneration
+        run: |
+          git diff --check
+          git diff --exit-code
+          STATUS="$(git status --porcelain=v1 --untracked-files=all)"
+          if [[ -n "$STATUS" ]]; then
+            printf '%s\n' "$STATUS"
+            exit 1
+          fi
+
+      - name: Record artifact status
+        if: ${{ always() }}
+        env:
+          COMMIT_SHA: ${{ github.sha }}
+          JOB_STATUS: ${{ job.status }}
+          RUN_ATTEMPT: ${{ github.run_attempt }}
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          CI_EVIDENCE=.dev/tmp/ci-evidence
+          mkdir -p "$CI_EVIDENCE" .dev/logs coverage .dev/tmp/playwright-report .dev/tmp/playwright-results
+          if [[ ! -f .dev/logs/ci-verify-all.log ]]; then
+            printf '# command: npm run verify-all\n# seed: 20260809\n# git-commit: %s\n\nverify-all did not start; an earlier CI step failed.\n' \
+              "$GITHUB_SHA" > .dev/logs/ci-verify-all.log
+          fi
+          printf 'command=GitHub Actions Tier 0 verification\nseed=20260809\ngit_commit=%s\nrun_id=%s\nrun_attempt=%s\njob_status=%s\n' \
+            "$COMMIT_SHA" "$RUN_ID" "$RUN_ATTEMPT" "$JOB_STATUS" > coverage/ci-artifact-status.txt
+          cp coverage/ci-artifact-status.txt .dev/tmp/playwright-report/ci-artifact-status.txt
+          cp coverage/ci-artifact-status.txt .dev/tmp/playwright-results/ci-artifact-status.txt
+          cp coverage/ci-artifact-status.txt "$CI_EVIDENCE/ci-artifact-status.txt"
+          cp .dev/logs/ci-verify-all.log "$CI_EVIDENCE/ci-verify-all.log"
+          if [[ "$JOB_STATUS" == success ]]; then
+            for artifact in \
+              dependency-register.json \
+              dev-health.json \
+              foundation-evaluation.json \
+              release-manifest.json \
+              sbom.cdx.json; do
+              test -f "evidence/$artifact"
+              cp "evidence/$artifact" "$CI_EVIDENCE/$artifact"
+            done
+          fi
+
+      - name: Upload verification evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: tier0-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .dev/tmp/ci-evidence/
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 14
+
+      - name: Upload coverage artifacts
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: coverage-${{ github.run_id }}-${{ github.run_attempt }}
+          path: coverage/
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload Playwright artifacts
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: playwright-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            .dev/tmp/playwright-report/
+            .dev/tmp/playwright-results/
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 14

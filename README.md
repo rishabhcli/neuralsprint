@@ -6,16 +6,43 @@
 
 ## Repository status
 
-Implementation has not started. The repository currently contains the authoritative product and competition specifications. This README defines the production target that future code must satisfy; it does not claim that planned commands or components already exist.
+The repository is in its Tier 0 executable-foundation slice. The implemented surface is intentionally limited to a strict TypeScript/React status page, repository verification commands, and four repository-owned local development services. It accepts zero document bytes and exposes no PDF inspection, repair, independent verification, or report-export path.
 
-| Document | Authority |
-|---|---|
-| [HACKATHON.md](./HACKATHON.md) | Eligibility, mandatory submission fields, judging criteria, deadlines, links |
-| [WINNING_IDEA.md](./WINNING_IDEA.md) | Selected concept, hard technical core, validation, build order, demo and risk analysis |
-| [README.md](./README.md) | Product contract, architecture, production and release expectations |
-| [AGENTS.md](./AGENTS.md) | Binding implementation rules for every coding agent working in this repository |
+**This repository is not yet in production.** A passing build, a healthy local service, or a rendered foundation page proves only that named foundation check. It does not satisfy the release gates or any clause of `GOAL.md` section 5 on its own.
 
-If these documents disagree, preserve the external requirements in HACKATHON.md, then the product intent in WINNING_IDEA.md, and resolve the conflict explicitly in an ADR instead of guessing.
+| Document                                                       | Authority                                                                                         |
+| -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| [HACKATHON.md](./HACKATHON.md)                                 | Eligibility, mandatory submission fields, judging criteria, deadlines, links                      |
+| [WINNING_IDEA.md](./WINNING_IDEA.md)                           | Selected concept, hard technical core, validation, build order, demo and risk analysis            |
+| [README.md](./README.md)                                       | Product contract, architecture, production and release expectations                               |
+| [AGENTS.md](./AGENTS.md)                                       | Binding implementation rules for every coding agent working in this repository                    |
+| [GOAL.md](./GOAL.md)                                           | Work ordering, production-state test, tier ladder, evidence protocol, and continuing epoch engine |
+| [SUPPORT_MATRIX.md](./SUPPORT_MATRIX.md)                       | Versioned statement of implemented, unsupported, and unverified surfaces                          |
+| [ADR-0001](./adr/0001-toolchain-and-local-service-contract.md) | Toolchain, verification, package, and local-service decision                                      |
+| [Dependency register](./docs/dependencies.md)                  | Direct-package licence, maintenance, advisory, binary, and cost review                            |
+| [Tier 0 threat model](./docs/threat-model-tier0.md)            | Local HTTP, process ownership, fixture, dependency, browser, and evidence threats                 |
+
+Read the first five documents in the table in order. If they conflict, preserve `HACKATHON.md` as external truth, identify the exact conflict, and resolve it through an ADR or user instruction instead of silently choosing the easier interpretation.
+
+### Executable foundation boundary
+
+What exists now:
+
+- an explicit Node/npm toolchain and exact direct dependency versions;
+- strict TypeScript project references for browser code, Node configuration, checked-JavaScript control-plane scripts, and tests;
+- blocking format, lint, type, architecture-boundary, test, browser, build, and audit command surfaces;
+- a static status page that visibly refuses to imply document safety;
+- loopback-only development services within ports `4210`–`4213`, with repository-owned process state beneath `.dev/`;
+- typed liveness and semantic readiness routes for each allocated service;
+- versioned governance, dependency, assumptions, blocker, progress, and support documents.
+
+What does not exist now:
+
+- PDF ingestion, parsing, paint-order interpretation, OCR, or revision archaeology;
+- candidate detection or sensitive-region editing;
+- vector or raster sanitization;
+- a fresh-worker verifier, green document verdict, signed report, or sanitized PDF export;
+- production deployment, reproducible signed release, soak, rollback drill, real-user outcome, or completed hackathon submission.
 
 ## Product contract
 
@@ -48,21 +75,21 @@ Give users a production-grade local tool that identifies recoverable content hid
 
 A non-goal may become part of the product only after the core release gates pass and an ADR explains why the additional surface does not weaken correctness, safety, usability, or schedule.
 
-## Production architecture
+## Target production architecture
 
-Static/offline-capable app with bundled workers/assets and no document upload. Processing limits are explicit; unsupported structures fail closed and never become a green result.
+The target is a static/offline-capable app with bundled workers/assets and no document upload. This section is a design contract for later tiers, not a description of PDF functionality in the Tier 0 foundation. Processing limits will be explicit; unsupported structures must fail closed and never become a green result.
 
 ### Planned component boundaries
 
-| Area | Production responsibility |
-|---|---|
-| `src/pdf/parser` | xref tables/streams, object graph, filters, revision chain |
-| `src/pdf/interpreter` | paint order, transforms, glyph geometry, hidden content |
-| `src/findings` | typed leak classes and masked evidence |
-| `src/sanitizer` | vector removal, raster fallback, allowlisted rebuild |
-| `src/verifier` | fresh-process structural, textual, byte, OCR, and pixel checks |
-| `src/ui` | page review, region editing, status, accessibility |
-| `fixtures` | generated adversarial PDFs and expected results |
+| Area                  | Production responsibility                                      |
+| --------------------- | -------------------------------------------------------------- |
+| `src/pdf/parser`      | xref tables/streams, object graph, filters, revision chain     |
+| `src/pdf/interpreter` | paint order, transforms, glyph geometry, hidden content        |
+| `src/findings`        | typed leak classes and masked evidence                         |
+| `src/sanitizer`       | vector removal, raster fallback, allowlisted rebuild           |
+| `src/verifier`        | fresh-process structural, textual, byte, OCR, and pixel checks |
+| `src/ui`              | page review, region editing, status, accessibility             |
+| `fixtures`            | generated adversarial PDFs and expected results                |
 
 Dependencies should flow from applications/adapters toward typed domain packages. Domain logic must remain testable without UI, network, cloud credentials, or third-party services. Infrastructure code may assemble components but must not become the only place where product invariants are enforced.
 
@@ -131,6 +158,8 @@ Project-specific required test surfaces:
 
 Every production path also needs unit tests, property or fuzz tests where state space matters, integration tests at real boundaries, end-to-end tests of the user outcome, accessibility checks, performance budgets, security regression tests, and failure-injection coverage. Mocks belong in test fixtures; the shipped runtime must not depend on a fake service or hardcoded winning example.
 
+The Tier 0 V8 percentage is deliberately scoped to the pure in-process release-boundary module under `src/config/`; it is not repository-wide control-plane coverage. Lifecycle, process ownership, HTTP control, fixture filesystem, preview, and browser behavior are instead exercised by named real-boundary integration, contract, security, and Playwright tests. Do not publish the scoped percentage as total Tier 0 coverage.
+
 Evaluation datasets and fixtures are versioned, provenance-aware, and isolated from tuning when described as held out. A number may appear in the README or submission only when a committed script regenerates it from a committed manifest.
 
 ## Performance and accessibility
@@ -147,6 +176,11 @@ Accessibility is a release gate, not a polish task. The production interface mus
 ├── AGENTS.md                 # Binding implementation rules for coding agents
 ├── HACKATHON.md              # External rules and submission facts
 ├── WINNING_IDEA.md           # Selected product/technical blueprint
+├── .github/workflows/        # Pinned clean-install CI gates
+├── adr/                      # Architecture decisions
+├── config/                   # Versioned runtime and release contracts
+├── evidence/                 # Regenerable command-owned artifacts
+├── scripts/                  # Lifecycle, verification, and evidence tasks
 ├── src/pdf/parser/
 ├── src/pdf/interpreter/
 ├── src/findings/
@@ -155,7 +189,7 @@ Accessibility is a release gate, not a polish task. The production interface mus
 ├── src/ui/
 ├── fixtures/
 ├── tests/                    # Unit, property, integration, E2E, resilience
-├── docs/                     # ADRs, threat model, runbooks, evaluation
+├── docs/                     # Dependency, threat-model, runbook, and evaluation records
 └── infra/                    # Reproducible deployment and environment policy
 ```
 
@@ -163,19 +197,63 @@ This is a boundary contract, not a command to create empty directories. Add a di
 
 ## Development command contract
 
-No commands are advertised as working until the corresponding toolchain is committed. The first production scaffold must expose one documented, cross-platform command surface, preferably through a checked-in task runner or Makefile:
+Use the repository-pinned Node.js and npm versions. From a clean checkout:
 
-| Command | Required behavior |
-|---|---|
-| `bootstrap` | Verify tool versions, install locked dependencies, initialize only local non-secret state |
-| `check` | Format check, lint, type/static analysis, schema/config validation |
-| `test` | Deterministic unit and property suites |
-| `test-integration` | Real boundary tests using isolated local/test dependencies |
-| `test-e2e` | Supported user workflows and failure states |
-| `eval` | Reproduce committed domain evaluation and metrics |
-| `build` | Produce release artifacts from a clean checkout |
-| `run-local` | Start the complete local system or a documented production-equivalent subset |
-| `release-check` | Run all blocking gates, artifact/SBOM generation, and policy checks |
+```sh
+nvm use
+npm run bootstrap
+```
+
+System prerequisites are `git` plus a process/listener inspector: `lsof` and `ps` on macOS/Linux, or PowerShell with `Get-NetTCPConnection` on Windows. `bootstrap` probes these commands, validates the pinned toolchain, installs the exact lockfile graph with `npm ci`, and installs the pinned Chromium binary used by Playwright. npm and browser caches, the Playwright profile, and temporary files remain under the git-ignored `.dev/` namespace. It does not start services, accept a PDF, or process a document.
+
+### Blocking repository commands
+
+| Command                         | Required behavior                                                                                          |
+| ------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `npm run format:check`          | Check repository formatting without rewriting files                                                        |
+| `npm run lint`                  | Run static analysis with zero warnings allowed                                                             |
+| `npm run typecheck`             | Build strict TypeScript and checked-JavaScript project references; emit declarations only to `.dev/cache/` |
+| `npm run boundaries`            | Reject imports that violate the documented package ownership map                                           |
+| `npm run dependencies:check`    | Verify the direct register, installed licences, and exact lockfile graph; emit evidence                    |
+| `npm run check`                 | Run format, lint, type, and boundary checks together                                                       |
+| `npm test`                      | Run deterministic Vitest suites with blocking V8 coverage                                                  |
+| `npm run test:unit`             | Run unit and property suites only                                                                          |
+| `npm run test:integration`      | Run real local-boundary integration suites                                                                 |
+| `npm run test:contract`         | Run the current typed development-health and service-identity contract suite                               |
+| `npm run test:e2e`              | Run Playwright against the explicit test-harness server on port `4212`                                     |
+| `npm run test:accessibility`    | Run browser checks tagged as accessibility tests                                                           |
+| `npm run test:security`         | Run security/privacy regression suites                                                                     |
+| `npm run test:performance`      | Build and enforce the current static-asset byte budgets                                                    |
+| `npm run eval`                  | Regenerate the currently implemented foundation evaluation; it publishes no PDF metric                     |
+| `npm run build`                 | Typecheck and emit the static application into `dist/`                                                     |
+| `npm run release:metadata`      | Build, enforce asset budgets, and regenerate the production-dependency SBOM and hashed manifest            |
+| `npm run evidence:dev-health`   | Regenerate typed evidence for allocated readiness and the free reserved port block                         |
+| `npm run evidence:verify-all`   | Capture a portable working-tree diagnostic log while delegating to `verify-all`                            |
+| `npm run evidence:clean-verify` | Refuse a dirty checkout, then capture the clean-checkout `verify-all` log                                  |
+| `npm run verify-all`            | Run the complete non-interactive repository gate; any required stage failure is terminal                   |
+| `npm run full-verify`           | Stable task-runner alias for `verify-all`; all gates use the same implementation                           |
+| `npm run release-check`         | Alias the release gate to `verify-all`; it does not assert production by itself                            |
+
+`npm run format` intentionally rewrites only the configured formatting targets; build and evidence commands may also regenerate their documented output directories. Working-tree output is diagnostic. Release evidence must come from `npm run evidence:clean-verify` in a clean checkout, with its exact commit and toolchain recorded.
+
+### Local-service commands
+
+| Command                 | Exact behavior                                                                                                  |
+| ----------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `npm run dev:preflight` | Check ports `4210`–`4219`, reject foreign listeners in the owned block, and prepare ignored `.dev/` directories |
+| `npm run dev:up`        | Start all four allocated services idempotently and record tokenized process ownership under `.dev/pids/`        |
+| `npm run dev:health`    | Require correct service identity and semantic readiness from each allocated service                             |
+| `npm run dev:down`      | Validate ownership and stop only PIDs started by this repository                                                |
+| `npm run run-local`     | Run `dev:up` followed by `dev:health`; it starts the foundation, not the future PDF product                     |
+
+|   Port | Role                                 | Readiness requirement                                            |
+| -----: | ------------------------------------ | ---------------------------------------------------------------- |
+| `4210` | Vite application development server  | Correct identity plus usable HTML/module transform               |
+| `4211` | built-asset preview server           | Correct identity plus usable built HTML/assets                   |
+| `4212` | Playwright test-harness server       | Correct identity plus test-mode application response             |
+| `4213` | generated adversarial-fixture server | Correct identity plus manifest and a real synthetic PDF response |
+
+Every allocated service binds to `127.0.0.1`, exposes `/__neuralsprint/live` and `/__neuralsprint/ready`, and writes logs/PIDs/temp state only below `.dev/`. Ports `4214`–`4219` are reserved. Framework defaults, dynamic free-port selection, shared browser profiles, and broad process termination are prohibited.
 
 A new contributor should be able to move from a clean checkout to a verified local system without tribal knowledge.
 

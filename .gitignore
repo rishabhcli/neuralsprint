@@ -1,0 +1,15 @@
+node_modules/
+dist/
+coverage/
+playwright-report/
+test-results/
+*.tsbuildinfo
+.DS_Store
+
+# Repository-owned runtime state. See GOAL.md section 0A.
+.dev/
+
+# Local environment and secret material.
+.env
+.env.*
+!.env.example

@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "command": "npm run release:metadata",
+  "seed": 20260809,
+  "packageLockSha256": "3da6d59b057c6fce3201231b387b8e8a5ba9de19666daa3389d03c798c0119a8",
+  "sbomSha256": "f9bca1e98e720549cc1e5824c93dc50b70a56a2cdf1fe4b4434311c4b6740be5",
+  "artifacts": [
+    {
+      "path": "dist/assets/index-CGlbsapu.js",
+      "bytes": 193134,
+      "sha256": "f9618410d8e150c7b9ad01eff1bbad1755892a5789323716d8ca100ad29e74ab"
+    },
+    {
+      "path": "dist/assets/index-DRJ-50DL.css",
+      "bytes": 3673,
+      "sha256": "d94d9e933fb3aceee68248b9e8a2a23f4ae3700a34e2f9c414944c21df3aa6e8"
+    },
+    {
+      "path": "dist/index.html",
+      "bytes": 644,
+      "sha256": "900e0c4e2425b34724ea1dec63d2cc20de947297cd5fe0ac67750b6ed8aee7ea"
+    }
+  ]
+}

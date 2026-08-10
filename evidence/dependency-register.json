@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "command": "npm run dependencies:check",
+  "seed": 20260809,
+  "packageLockSha256": "3da6d59b057c6fce3201231b387b8e8a5ba9de19666daa3389d03c798c0119a8",
+  "directDependenciesReviewed": 21,
+  "resolvedPackageEntries": 225,
+  "installScriptPolicy": {
+    "fsevents": false
+  },
+  "licenses": [
+    "Apache-2.0",
+    "MIT",
+    "MPL-2.0"
+  ]
+}

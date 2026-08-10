@@ -1,0 +1,19 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": true,
+    "composite": true,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "lib": ["ES2024"],
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "outDir": ".dev/cache/typescript/scripts-types",
+    "rootDir": "scripts",
+    "target": "ES2024",
+    "tsBuildInfoFile": ".dev/cache/typescript/scripts.tsbuildinfo",
+    "types": ["node"]
+  },
+  "include": ["scripts/**/*.mjs"]
+}

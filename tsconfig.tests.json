@@ -1,0 +1,17 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "allowJs": true,
+    "composite": true,
+    "lib": ["ES2024", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "target": "ES2024",
+    "tsBuildInfoFile": ".dev/cache/typescript/tests.tsbuildinfo",
+    "types": ["node", "vite/client", "vitest/globals"]
+  },
+  "include": ["tests", "src", "config/**/*.json"],
+  "references": [{ "path": "./tsconfig.scripts.json" }]
+}

@@ -1,0 +1,15 @@
+node_modules
+dist
+coverage
+playwright-report
+test-results
+.dev
+package-lock.json
+evidence/*.log
+evidence/*.json
+
+# Authoritative source documents predate the executable toolchain and are preserved byte-for-byte.
+AGENTS.md
+GOAL.md
+HACKATHON.md
+WINNING_IDEA.md

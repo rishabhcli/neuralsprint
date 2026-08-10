@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "command": "npm run evidence:dev-health",
+  "seed": 20260809,
+  "host": "127.0.0.1",
+  "services": [
+    {
+      "service": "app-dev",
+      "port": 4210,
+      "status": "ready"
+    },
+    {
+      "service": "preview",
+      "port": 4211,
+      "status": "ready"
+    },
+    {
+      "service": "playwright",
+      "port": 4212,
+      "status": "ready"
+    },
+    {
+      "service": "fixtures",
+      "port": 4213,
+      "status": "ready"
+    }
+  ],
+  "reservedPortsFree": [
+    4214,
+    4215,
+    4216,
+    4217,
+    4218,
+    4219
+  ]
+}
